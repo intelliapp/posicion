@@ -44,6 +44,16 @@ class RoadZone {
 		$this->_clases = Priority::getPriority();
 	}
 
+//	public function init($config = array()) {
+//		$this->precision_enable = (isset($config['precision_enable']) && $config['precision_enable']);
+//		if(isset($config['wkt_point'])) {
+//			$this->wkt_point = $config['wkt_point'];
+//		}
+//		if(isset($config['country_name'])) {
+//			$this->country = $config['country_name'];
+//		}
+//	}
+
 	public function init($wkt_point, $country=NULL, $precision = NULL) {
 		$this->wkt_point = $wkt_point;
 		$this->country = $country;

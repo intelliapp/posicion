@@ -54,6 +54,8 @@ if(defined('STDIN')
 		$facade->execute();
 	}
 }
+if(defined('LOG_DIR')) {
 $log->LogInfo("Tiempo de ejecucion: " . round(getmicrotime() - $TIME_START, 2) . " segundos");
+}
 exit(1);
 ?>

@@ -1,6 +1,9 @@
 <?php
-require_once('scripts/KLogger.php');
-require_once('scripts/underscore.php');
+if(!class_exists('KLogger')){
+require_once( dirname( dirname(__FILE__) ) . '/scripts/KLogger.php');
+}
+require_once( dirname( dirname(__FILE__) ) . '/scripts/underscore.php');
+
 function loadClasses($dir) {
 	foreach (list_modules($dir) as $model) {
 		require_once ($dir . $model . '.php');

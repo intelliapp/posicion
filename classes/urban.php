@@ -14,11 +14,8 @@ class UrbanZone {
 	private $_array_names;
 
 	public function __construct($db) {
+        $this->uuid = __()->uniqueId(self::$name . '_');
 		$this->db = $db;
-	}
-
-	public function isUrbanZone(){
-
 	}
 
 	public function change_query($query) {
@@ -26,7 +23,6 @@ class UrbanZone {
 	}
 
 	public function cleanDouble() {
-		$this->uuid = __()->uniqueId(self::$name . '_');
 		$this->_array_names = array();
 		$this->intersections = array();
 		$cloned_array = array();
@@ -93,7 +89,5 @@ class UrbanZone {
 		}
 		return $this->data;
 	}
-
-	
 
 }

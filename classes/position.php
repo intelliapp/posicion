@@ -314,7 +314,13 @@ class PosicionLogica extends QueryModel{
 					$this->resultsetLocations = $data;
 				}
 				$query_locat = sprintf($this->location_query, $this->wkt_point, $place_id, $this->wkt_point);
+				$options = array("wkt_point" => $this->wkt_point,
+								 "country_name" => $this->country);
+				if(isset($precision_enable)){
+					$options = array_merge($options, array('precision_enable' => $precision_enable));
+				}
 				//TODO poner un array config
+				// $this->road_zone->init($options)
 				$this->road_zone->init($this->wkt_point, $this->country, isset($precision_enable));
 				$this->road_zone->setPlaceId($place_id);
 				if($this->road_zone->execute($query_locat)) {
