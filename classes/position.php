@@ -1,4 +1,5 @@
 <?php
+define('administrative', 'isin');
 /**
  * Generic exception class
  */
@@ -26,6 +27,23 @@ class Distance extends Base{
 		$this->exec_querys++;
 		$data = $obj_query->fetch(PDO::FETCH_ASSOC);
 		return $data;
+	}
+
+}
+
+class Country extends Base {
+	
+	public static $name = __CLASS__;
+
+	public function execute($query) {
+		$obj_query = $this->db->prepare($query);
+		$obj_query->execute();
+		$this->exec_querys++;
+		$data = $obj_query->fetch(PDO::FETCH_ASSOC);
+		return $data;
+	}
+
+	public function parse() {
 	}
 
 }
@@ -307,11 +325,13 @@ class PosicionLogica extends QueryModel{
 				&& isset($data['place_id'])) {
 				$place_id = $data['place_id'];
 				$query_names = sprintf($this->query_nombres, $place_id);
-				$dbquery = $this->db->prepare($query_names);
-				$dbquery->execute();
-				$data = $dbquery->fetch(PDO::FETCH_ASSOC);
-				if($this->printDataset) {
+				$country = new Country($this->db);
+				$data = $country->execute($query_names);
+				if($data && $this->printDataset) {
 					$this->resultsetLocations = $data;
+				}
+				if($data) {
+					$this->stdout($data['isin'], 10);
 				}
 				$query_locat = sprintf($this->location_query, $this->wkt_point, $place_id, $this->wkt_point);
 				$options = array("wkt_point" => $this->wkt_point,
@@ -319,9 +339,7 @@ class PosicionLogica extends QueryModel{
 				if(isset($precision_enable)){
 					$options = array_merge($options, array('precision_enable' => $precision_enable));
 				}
-				//TODO poner un array config
-				// $this->road_zone->init($options)
-				$this->road_zone->init($this->wkt_point, $this->country, isset($precision_enable));
+				$this->road_zone->init($options);
 				$this->road_zone->setPlaceId($place_id);
 				if($this->road_zone->execute($query_locat)) {
 					$this->exec_querys++;
@@ -338,7 +356,7 @@ class PosicionLogica extends QueryModel{
 				if(!empty($this->road_zone->administrative_names)) {
 					$this->stdout(" {$this->road_zone->administrative_names}", 7);
 				}
-				// sending all resultsets to view
+				// sending all resultsets to view for debug
 				if($this->road_zone->data && $this->printDataset) {
 					$this->recordset = $this->road_zone->data;
 				}
@@ -373,7 +391,7 @@ class PosicionLogica extends QueryModel{
 		if(isset($this->_positions)
 			&& $this->_positions['move'] <> "--") {
 			$pos = GeoUtils::tranformPosition($this->_positions['move']);
-			$this->stdout($pos, 10);
+			$this->stdout($pos, 11);
 		}
 		if(!$this->_isConsole
 			&& $this->_isDebug) {
@@ -401,12 +419,11 @@ class PosicionLogica extends QueryModel{
 			ob_end_clean();
 			ob_end_flush();
 		}
+		uksort($this->_results, 'cmp_function');
 		if($this->_bulkmode) {
-			uksort($this->_results, 'strcasecmp');
 			$this->_buffer .= join(",", $this->_results);
 		}
 		if($this->_isConsole) {
-			uksort($this->_results, 'strcasecmp');
 			$output = join(",", $this->_results);
 			if($this->utf8_enable) {
 				echo utf8_encode(ltrim($output));

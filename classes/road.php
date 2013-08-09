@@ -44,20 +44,14 @@ class RoadZone {
 		$this->_clases = Priority::getPriority();
 	}
 
-//	public function init($config = array()) {
-//		$this->precision_enable = (isset($config['precision_enable']) && $config['precision_enable']);
-//		if(isset($config['wkt_point'])) {
-//			$this->wkt_point = $config['wkt_point'];
-//		}
-//		if(isset($config['country_name'])) {
-//			$this->country = $config['country_name'];
-//		}
-//	}
-
-	public function init($wkt_point, $country=NULL, $precision = NULL) {
-		$this->wkt_point = $wkt_point;
-		$this->country = $country;
-		$this->precision_enable = (isset($precision) && $precision);
+	public function init($config = array()) {
+		$this->precision_enable = (isset($config['precision_enable']) && $config['precision_enable']);
+		if(isset($config['wkt_point'])) {
+			$this->wkt_point = $config['wkt_point'];
+		}
+		if(isset($config['country_name'])) {
+			$this->country = $config['country_name'];
+		}
 	}
 
 	public function validOutsideZone($query, $count_validzone) {
@@ -134,9 +128,9 @@ class RoadZone {
 			$arr = array_slice($arr, 0, 2);
 		}
 		$arr = array_reverse($arr, TRUE);
-		if(!in_array($this->country, $arr)) {
-			$arr[] = $this->country;
-		}
+		// if(!in_array($this->country, $arr)) {
+		// 	$arr[] = $this->country;
+		// }
 		$this->administrative_names = join(", ", $arr);
 	}
 
@@ -148,6 +142,8 @@ class RoadZone {
 			if(empty($this->roadname)) {
 				$this->getAdministrativeNames();
 			}
+			// if(!mb_strpos(strtolower($this->roadname), strtolower($this->country))) {
+			// }
 			return TRUE;	
 		}
 		return FALSE;

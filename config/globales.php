@@ -4,6 +4,10 @@ require_once( dirname( dirname(__FILE__) ) . '/scripts/KLogger.php');
 }
 require_once( dirname( dirname(__FILE__) ) . '/scripts/underscore.php');
 
+function cmp_function($a, $b) {
+  if ($a == $b) return 0;
+  return ($a < $b) ? -1 : 1;
+}
 function loadClasses($dir) {
 	foreach (list_modules($dir) as $model) {
 		require_once ($dir . $model . '.php');
