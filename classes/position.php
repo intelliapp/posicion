@@ -1,5 +1,4 @@
 <?php
-define('administrative', 'isin');
 /**
  * Generic exception class
  */
@@ -41,9 +40,6 @@ class Country extends Base {
 		$this->exec_querys++;
 		$data = $obj_query->fetch(PDO::FETCH_ASSOC);
 		return $data;
-	}
-
-	public function parse() {
 	}
 
 }
@@ -331,11 +327,10 @@ class PosicionLogica extends QueryModel{
 					$this->resultsetLocations = $data;
 				}
 				if($data) {
-					$this->stdout($data['isin'], 10);
+					$this->stdout($data['isin'], 20);
 				}
 				$query_locat = sprintf($this->location_query, $this->wkt_point, $place_id, $this->wkt_point);
-				$options = array("wkt_point" => $this->wkt_point,
-								 "country_name" => $this->country);
+				$options = array("wkt_point" => $this->wkt_point);
 				if(isset($precision_enable)){
 					$options = array_merge($options, array('precision_enable' => $precision_enable));
 				}
@@ -344,17 +339,17 @@ class PosicionLogica extends QueryModel{
 				if($this->road_zone->execute($query_locat)) {
 					$this->exec_querys++;
 					if(!empty($this->road_zone->roadname)) {
-						$this->stdout(" {$this->road_zone->roadname}", 5);
+						$this->stdout($this->road_zone->roadname, 5);
 					}
 					// OPTIONAL NAMES
 					$this->road_zone->queryOptionalNames($this->qclasses);
 					$this->exec_querys = count($this->_clases) + $this->exec_querys;
 					if(!empty($this->road_zone->optional_names)) {
-						$this->stdout(" {$this->road_zone->optional_names}", 6);
+						$this->stdout($this->road_zone->optional_names, 6);
 					}
 				}
 				if(!empty($this->road_zone->administrative_names)) {
-					$this->stdout(" {$this->road_zone->administrative_names}", 7);
+					$this->stdout($this->road_zone->administrative_names, 7);
 				}
 				// sending all resultsets to view for debug
 				if($this->road_zone->data && $this->printDataset) {
@@ -378,15 +373,19 @@ class PosicionLogica extends QueryModel{
 				}else{
 					$km = (string)((float)($distance));
 				}
-				$this->stdout(" $km km de $city", 8);
+				$this->stdout("$km km de $city", 8);
 			}
 			// Departamento
 			$province = new Province($this->db);
 			$query = sprintf($this->states_query, $this->wkt_point);
 			$departamento = $province->execute($query);
 			if($departamento){
-				$this->stdout(" departamento de $departamento", 9);
+				$this->stdout("departamento de $departamento", 9);
 			}
+		}
+		// adding country name at the end
+		if(!in_array($this->country, $this->_results)) {
+			$this->stdout($this->country, 20);
 		}
 		if(isset($this->_positions)
 			&& $this->_positions['move'] <> "--") {
@@ -402,9 +401,9 @@ class PosicionLogica extends QueryModel{
 
 	private function stdout($msg, $index=NULL){
 		if(is_null($index)) {
-			$this->_results[] = $msg;
+			$this->_results[] = " $msg";
 		}else{
-			$this->_results[$index] = $msg;
+			$this->_results[$index] = " $msg";
 		}
 		
 		$end =  ($this->_isConsole) ? " " : "<br>\n";
