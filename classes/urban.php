@@ -74,7 +74,7 @@ class UrbanZone {
 		$this->data = $this->_objquery->fetchAll(PDO::FETCH_ASSOC);
 	}
 
-	public function fetch () {
+	public function fetchData () {
 		$this->data = $this->_objquery->fetch(PDO::FETCH_ASSOC);
 	}
 
@@ -82,9 +82,9 @@ class UrbanZone {
 		$this->data = null;
 		if($this->_objquery->execute()) {
 			if($bool) {
-				$this->data = $this->_objquery->fetchAll(PDO::FETCH_ASSOC);	
+				$this->fetchAll();
 			}else{
-				$this->data = $this->_objquery->fetch(PDO::FETCH_ASSOC);
+				$this->fetchData();
 			}
 		}
 		return $this->data;

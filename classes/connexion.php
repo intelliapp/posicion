@@ -2,8 +2,6 @@
 class Connexion{
 	public $db = NULL;
 	private $_connexionstring;
-	// private $_connexionstring = "pgsql:host=%s;dbname=%s;port=%s";
-	// private $_connexionstring = "pgsql:host=%s;dbname=%s";
 
 	public function __construct() {
 	}
