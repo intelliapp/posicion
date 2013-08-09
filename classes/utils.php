@@ -2,7 +2,7 @@
 class PGSQLUtils{
 	public static function unescape_hstore($hstore, $column) {
 		$arr = json_decode('{' . str_replace('"=>"', '":"', $hstore) . '}', true);
-		return $arr[$column];
+		return ($arr && isset($arr[$column]))? $arr[$column] : null;
 	}
 }
 class GeoUtils{
