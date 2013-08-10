@@ -384,7 +384,7 @@ class PosicionLogica extends QueryModel{
 			}
 		}
 		// adding country name at the end
-		if(!in_array($this->country, $this->_results)) {
+		if(!mb_strpos(strtolower(join($this->_results, " ")), strtolower($this->country))) {
 			$this->stdout($this->country, 20);
 		}
 		if(isset($this->_positions)
