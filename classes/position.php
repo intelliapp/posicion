@@ -102,6 +102,7 @@ class PosicionLogica extends QueryModel{
 	public $printDataset;
 	public $resultsetLocations;
 	public $utf8_enable;
+	public $urban_zone;
 	private $uuid;
 	private $_clases;
 	private $_results;
@@ -202,35 +203,35 @@ class PosicionLogica extends QueryModel{
 		if(!isset($this->flat) && !isset($this->flon)) {
 			return FALSE;
 		}
-		$this->urban_zone = new UrbanZone($this->db);
+		$this->urban = new UrbanZone($this->db);
 		$query = sprintf($this->perimetro_ciudad, $this->wkt_point);
-		$this->urban_zone->change_query($query);
-		if($this->urban_zone->execute()) {
+		$this->urban->change_query($query);
+		if($this->urban->execute()) {
 			$this->exec_querys++;
-			if(!$this->urban_zone->data || empty($this->urban_zone->data['ciudad'])) {
+			if(!$this->urban->data || empty($this->urban->data['ciudad'])) {
 				$error = sprintf("No se encuentra ningun resultado para este punto (%s,%s)", $this->flat, $this->flon);
 				$this->_errors = array('error' => 'not found', 'msg' => $error);
-				return FALSE;
+				// $this->urban_zone = FALSE;
 			}
-			$this->stdout(strtolower($this->urban_zone->data['ciudad']), 2);
-			return TRUE;
+			$this->stdout(strtolower($this->urban->data['ciudad']), 2);
+			$this->urban_zone = TRUE;
 		}
-		return FALSE;
+		return $this->urban_zone;
 	}
 
 	private function getUrbanLocations($end) {
 		$query = sprintf($this->second_query, $this->wkt_point, $this->wkt_point, $this->wkt_point);
 		$this->db->exec("SET client_encoding TO 'utf-8'");
-		$this->urban_zone->change_query($query);
-		if($this->urban_zone->execute($array_result = TRUE)) {
+		$this->urban->change_query($query);
+		if($this->urban->execute($array_result = TRUE)) {
 			$this->exec_querys++;
-			$this->urban_zone->cleanDouble();
-			if($this->urban_zone->data 
-				&& count($this->urban_zone->data)>1) {
+			$this->urban->cleanDouble();
+			if($this->urban->data 
+				&& count($this->urban->data)>1) {
 				if($this->printDataset) {
-					$this->city_recordset = $this->urban_zone->data;
+					$this->city_recordset = $this->urban->data;
 				}
-				$output = $this->urban_zone->getReadableAdress();
+				$output = $this->urban->getReadableAdress();
 				$this->stdout($output, 1);
 			}			
 		}
@@ -285,7 +286,6 @@ class PosicionLogica extends QueryModel{
 		}
 		// new UrbanZone()::isUrbanZone()
 		if($this->isUrbanZone()){
-			$urban_zone = True;
 			if(!$this->_isConsole 
 				&& $this->_isDebug) {
 				echo "estamos en zona urbana$end";
@@ -294,13 +294,11 @@ class PosicionLogica extends QueryModel{
 				$this->getUrbanLocations($end);
 			}
 		}
-
-		if(!isset($result_vias) && !isset($urban_zone)) {
+		if(!isset($result_vias) && !$this->urban_zone) {
 			if(!$this->_isConsole 
 				&& $this->_isDebug) {
 				echo "estamos en carretera$end";
 			}
-			$countryside_road = True;
 			$this->road_zone = new RoadZone($this->db);
 			$query = sprintf($this->count_query, $this->wkt_point, 'highway');
 			if($this->road_zone->validOutsideZone($query, $this->count_validzone)) {
@@ -341,8 +339,7 @@ class PosicionLogica extends QueryModel{
 					if(!empty($this->road_zone->roadname)) {
 						$this->stdout($this->road_zone->roadname, 5);
 					}
-					// OPTIONAL NAMES
-					$this->road_zone->queryOptionalNames($this->qclasses);
+					$this->road_zone->queryOptionalNames($this->qclasses, $range=2);
 					$this->exec_querys = count($this->_clases) + $this->exec_querys;
 					if(!empty($this->road_zone->optional_names)) {
 						$this->stdout($this->road_zone->optional_names, 6);
@@ -361,7 +358,7 @@ class PosicionLogica extends QueryModel{
 			}
 
 		}
-		if(!isset($urban_zone)) {
+		if(!$this->urban_zone) {
 			$distance = new Distance($this->db);
 			$query = sprintf($this->distance_city_query, $this->wkt_point, $this->wkt_point, $this->wkt_point);
 			$data = $distance->execute($query);

@@ -3,7 +3,8 @@ define('fieldname', 'name');
 class RoadZone {
 	public static $name = __CLASS__;
 
-	// public $country;
+	private $_clases;
+	private $uuid;
 	public $data;
 	public $way_query;
 	public $roadname;
@@ -33,8 +34,6 @@ class RoadZone {
 	);
 	public $wkt_point;
 	public $place_id;
-	private $_clases;
-	private $uuid;
 	public $recordset;
 	public $precision_enable;
 
@@ -91,7 +90,7 @@ class RoadZone {
 		}
 	}
 
-	public function queryOptionalNames($qclasses) {
+	public function queryOptionalNames($qclasses, $range = 1) {
 		$this->recordset = array();
 		foreach ($this->_clases as $value) {
 			$query = sprintf($qclasses, $this->wkt_point, $value, $this->place_id, $this->wkt_point);
@@ -99,15 +98,13 @@ class RoadZone {
 			$obj_query->execute();
 			$data = $obj_query->fetchAll(PDO::FETCH_ASSOC);
 			if($data){
-				$values = __($data)->chain()->pluck('name')->value();
-				foreach ($values as $row) {
-					if(mb_strpos($row, "name")) {
-						$this->optional_names = PGSQLUtils::unescape_hstore($row, fieldname);
-					}
-				}
+				$i = 0;
+				if(floatval($data[$i]['distancia']) < $range) {
+					$row = $data[$i]['name'];
+					$this->optional_names = PGSQLUtils::unescape_hstore($row, fieldname);
+				}	
 			}
 			$this->recordset[] = $data;
-			
 		}
 	}
 
